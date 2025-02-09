@@ -205,7 +205,7 @@ GameObject:
   - component: {fileID: 4894872305640102}
   - component: {fileID: 95464216564743392}
   m_Layer: 0
-  m_Name: Character_Cyber_Female_01
+  m_Name: Rya
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

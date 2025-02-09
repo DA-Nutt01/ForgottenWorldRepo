@@ -249,7 +249,7 @@ GameObject:
   - component: {fileID: 4016517212831504}
   - component: {fileID: 95437959242911452}
   m_Layer: 0
-  m_Name: Character_Rich_Male_01
+  m_Name: Frank
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

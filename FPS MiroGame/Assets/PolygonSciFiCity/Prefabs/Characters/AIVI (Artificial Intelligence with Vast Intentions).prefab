@@ -36,7 +36,7 @@ GameObject:
   - component: {fileID: 4950051439177134}
   - component: {fileID: 95910397095232528}
   m_Layer: 0
-  m_Name: Character_Robot_01
+  m_Name: AIVI (Artificial Intelligence with Vast Intentions)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

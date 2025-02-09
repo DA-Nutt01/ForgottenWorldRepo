@@ -1001,7 +1001,7 @@ GameObject:
   - component: {fileID: 4454330974147330}
   - component: {fileID: 95177514274603390}
   m_Layer: 0
-  m_Name: Character_Junky_Male_01
+  m_Name: Vars
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
