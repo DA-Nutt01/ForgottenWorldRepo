@@ -222,7 +222,7 @@ GameObject:
   - component: {fileID: 4139454865687900}
   - component: {fileID: 95221179433865890}
   m_Layer: 0
-  m_Name: Character_Hacker_Female_01
+  m_Name: (Bug) Alex  Hartman
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
