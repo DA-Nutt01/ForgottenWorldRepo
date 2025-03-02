@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Dialogue", menuName = "Dialogue", order = 0)]
-public class Dialogue : ScriptableObject
+namespace Dialogue
 {
-    [SerializeField] DialogueNode[] _nodes; // An array of the DialogueNode scriptable objects
+    [CreateAssetMenu(fileName = "New Dialogue", menuName = "Dialogue", order = 0)]
+    public class Dialogue : ScriptableObject
+    {
+        [SerializeField] DialogueNode[] _nodes; // An array of the DialogueNode scriptable objects
 
-    
+
+    }
 }
-
