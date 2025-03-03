@@ -10,6 +10,7 @@ namespace Dialogue.Editor
     public class DialogueEditor : EditorWindow
     {
         private Dialogue _selectedDialogue = null; // The currently opened Dialogue scriptable object
+        private GUIStyle _nodeStyle;
 
         [MenuItem("Window/Dialgoue Editor")] // An annotation to make this function called when clicking this menu item in the editor; For this to work, the function must be public, static, and return void
         public static void ShowEditorWindow()
@@ -36,6 +37,13 @@ namespace Dialogue.Editor
         private void OnEnable()
         {
             Selection.selectionChanged += OnSelectionChanged;
+
+            _nodeStyle = new GUIStyle();
+            _nodeStyle.normal.background = EditorGUIUtility.Load("node0") as Texture2D;
+            _nodeStyle.normal.textColor = Color.white;
+            _nodeStyle.padding = new RectOffset(20, 20, 20, 20);
+            _nodeStyle.border = new RectOffset(12, 12, 12, 12);
+            
         }
 
         private void OnSelectionChanged()
@@ -60,21 +68,29 @@ namespace Dialogue.Editor
             {
                 foreach (DialogueNode node in _selectedDialogue.GetAllNodes())
                 {
-                    EditorGUI.BeginChangeCheck();
-
-                    EditorGUILayout.LabelField("Node");
-                    string newText = EditorGUILayout.TextField(node.text);
-                    string newUniqueID = EditorGUILayout.TextField(node.uniqueID);
-
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        Undo.RecordObject(_selectedDialogue, "Update Dialogue Text");
-
-                        node.text = newText;
-                        node.uniqueID = newUniqueID;
-                    }
+                    OnGUINode(node);
                 }
             }
+        }
+
+        private void OnGUINode(DialogueNode node)
+        {
+            GUILayout.BeginArea(node.position, _nodeStyle);
+            EditorGUI.BeginChangeCheck();
+
+            EditorGUILayout.LabelField("Node", EditorStyles.whiteLabel);
+            string newText = EditorGUILayout.TextField(node.text);
+            string newUniqueID = EditorGUILayout.TextField(node.uniqueID);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(_selectedDialogue, "Update Dialogue Text");
+
+                node.text = newText;
+                node.uniqueID = newUniqueID;
+            }
+
+            GUILayout.EndArea();
         }
     }
 }
