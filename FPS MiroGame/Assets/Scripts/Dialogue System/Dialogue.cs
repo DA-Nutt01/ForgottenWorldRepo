@@ -25,6 +25,11 @@ namespace Dialogue
             // A getter function to return all nodes in this scriptable object
             return _nodes;
         }
+
+        public DialogueNode GetRootNode()
+        {
+            return _nodes[0];
+        }
     }
 
 }

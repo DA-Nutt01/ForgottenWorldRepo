@@ -10,7 +10,8 @@ namespace Dialogue.Editor
     public class DialogueEditor : EditorWindow
     {
         private Dialogue _selectedDialogue = null; // The currently opened Dialogue scriptable object
-        private GUIStyle _nodeStyle;
+        private GUIStyle _nodeStyle; // Responsible for the styling of the node
+        private bool _isdragging = false; // Flag to detect if this node is currently being dragged around the editor; 
 
         [MenuItem("Window/Dialgoue Editor")] // An annotation to make this function called when clicking this menu item in the editor; For this to work, the function must be public, static, and return void
         public static void ShowEditorWindow()
@@ -66,6 +67,8 @@ namespace Dialogue.Editor
             }
             else
             {
+                ProcessEvents();
+
                 foreach (DialogueNode node in _selectedDialogue.GetAllNodes())
                 {
                     OnGUINode(node);
@@ -73,9 +76,29 @@ namespace Dialogue.Editor
             }
         }
 
+        private void ProcessEvents()
+        {
+            
+            // Node Repositioning
+            if (Event.current.type == EventType.MouseDown && !_isdragging)
+            {
+                _isdragging = true;
+            }
+            else if (Event.current.type == EventType.MouseDrag && _isdragging)
+            {
+                Undo.RecordObject(_selectedDialogue, "Move Dialogue Node");
+                _selectedDialogue.GetRootNode().rect.position = Event.current.mousePosition;
+                GUI.changed = true;
+            }
+            else if (Event.current.type == EventType.MouseUp && _isdragging)
+            {
+                _isdragging = false;
+            }
+        }
+
         private void OnGUINode(DialogueNode node)
         {
-            GUILayout.BeginArea(node.position, _nodeStyle);
+            GUILayout.BeginArea(node.rect, _nodeStyle);
             EditorGUI.BeginChangeCheck();
 
             EditorGUILayout.LabelField("Node", EditorStyles.whiteLabel);
