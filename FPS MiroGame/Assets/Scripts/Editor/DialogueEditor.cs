@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
+using System;
 
 namespace Dialogue.Editor
 {
@@ -11,7 +12,9 @@ namespace Dialogue.Editor
     {
         private Dialogue _selectedDialogue = null; // The currently opened Dialogue scriptable object
         private GUIStyle _nodeStyle; // Responsible for the styling of the node
-        private bool _isdragging = false; // Flag to detect if this node is currently being dragged around the editor; 
+        private DialogueNode _draggingNode = null; // The current dialogue node being repositioned in the editor
+        private Vector2 _dragOffset; // An offset to keep the mouse in the same position relative to the node it is dragging
+        
 
         [MenuItem("Window/Dialgoue Editor")] // An annotation to make this function called when clicking this menu item in the editor; For this to work, the function must be public, static, and return void
         public static void ShowEditorWindow()
@@ -80,19 +83,23 @@ namespace Dialogue.Editor
         {
             
             // Node Repositioning
-            if (Event.current.type == EventType.MouseDown && !_isdragging)
+            if (Event.current.type == EventType.MouseDown && _draggingNode == null)
             {
-                _isdragging = true;
+                _draggingNode = GetNodeAtPoint(Event.current.mousePosition);
+                if (_draggingNode != null)
+                {
+                    _dragOffset = _draggingNode.rect.position - Event.current.mousePosition;
+                }
             }
-            else if (Event.current.type == EventType.MouseDrag && _isdragging)
+            else if (Event.current.type == EventType.MouseDrag && _draggingNode != null)
             {
                 Undo.RecordObject(_selectedDialogue, "Move Dialogue Node");
-                _selectedDialogue.GetRootNode().rect.position = Event.current.mousePosition;
+                _draggingNode.rect.position = Event.current.mousePosition + _dragOffset;
                 GUI.changed = true;
             }
-            else if (Event.current.type == EventType.MouseUp && _isdragging)
+            else if (Event.current.type == EventType.MouseUp && _draggingNode != null)
             {
-                _isdragging = false;
+                _draggingNode = null;
             }
         }
 
@@ -114,6 +121,19 @@ namespace Dialogue.Editor
             }
 
             GUILayout.EndArea();
+        }
+
+        private DialogueNode GetNodeAtPoint(Vector2 mousePosition)
+        {
+            DialogueNode foundNode = null;
+            foreach (DialogueNode node in _selectedDialogue.GetAllNodes())
+            {
+                if (node.rect.Contains(mousePosition))
+                {
+                    foundNode = node;
+                }
+            }
+            return foundNode;
         }
     }
 }
