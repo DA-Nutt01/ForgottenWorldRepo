@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 namespace Dialogue
 {
@@ -8,31 +9,50 @@ namespace Dialogue
     public class Dialogue : ScriptableObject
     {
         [SerializeField] 
-        List<DialogueNode> _nodes; // A list of the DialogueNode scriptable objects
+        List<DialogueNode> _nodes = new List<DialogueNode>(); // A list of the DialogueNode scriptable objects
 
-        Dictionary<string, DialogueNode> nodeLookup = new Dictionary<string, DialogueNode>(); 
+        Dictionary<string, DialogueNode> nodeLookup = new Dictionary<string, DialogueNode>(); // A dictionary of all dialogue nodes in this dialogue
 
-#if UNITY_EDITOR
-        private void Awake()
+        public void InitializeRootNode()
         {
-            // Create a root dialogue node for this scriptable object when it is created if it does not already have one
-            if (_nodes.Count == 0)
-            {
-                _nodes.Add(new DialogueNode());
-            }
-
+            //Creates the root node for the dialogue
+            _nodes.Clear(); // Clear the nodes list 
+            DialogueNode rootNode = new DialogueNode(); // Construct a new Dialogue Node
+            rootNode.uniqueID = Guid.NewGuid().ToString(); // Assign the new root node a unique ID
+            _nodes.Add(rootNode); // Add the root node to the nodes list
             OnValidate();
         }
-#endif
+
+        public bool IsEmpty()
+        {
+            return _nodes.Count == 0;
+        }
 
         private void OnValidate() // Called when a script instance is loaded or a value is updated in the editor
         {
+            if (_nodes.Count == 0)
+            {
+                Debug.Log("Count is 0");
+                DialogueNode rootNode = new DialogueNode();
+                rootNode.uniqueID = Guid.NewGuid().ToString();
+                _nodes.Add(rootNode);
+            }
+
             nodeLookup.Clear();
 
             foreach (DialogueNode node in GetAllNodes())
             {
                 nodeLookup[node.uniqueID] = node;
             }
+        }
+
+        public void CreateNode(DialogueNode parentNode)
+        {
+            DialogueNode newNode = new DialogueNode();
+            newNode.uniqueID = Guid.NewGuid().ToString();
+            parentNode.childrenNodeIDs.Add(newNode.uniqueID);
+            _nodes.Add(newNode);
+            OnValidate();
         }
 
         public IEnumerable<DialogueNode> GetAllNodes()
@@ -48,7 +68,8 @@ namespace Dialogue
 
         public IEnumerable<DialogueNode> GetAllChildren(DialogueNode parentNode)
         {
-            foreach (string childID in parentNode.childrenID) 
+
+            foreach (string childID in parentNode.childrenNodeIDs) 
             {
                 if (nodeLookup.ContainsKey(childID)) 
                 {

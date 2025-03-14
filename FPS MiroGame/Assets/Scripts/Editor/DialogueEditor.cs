@@ -11,9 +11,11 @@ namespace Dialogue.Editor
     public class DialogueEditor : EditorWindow
     {
         private Dialogue _selectedDialogue = null; // The currently opened Dialogue scriptable object
-        private GUIStyle _nodeStyle; // Responsible for the styling of the node
-        private DialogueNode _draggingNode = null; // The current dialogue node being repositioned in the editor
-        private Vector2 _dragOffset; // An offset to keep the mouse in the same position relative to the node it is dragging
+        
+        [NonSerialized] private GUIStyle _nodeStyle; // Responsible for the styling of the node
+        [NonSerialized] private DialogueNode _draggingNode = null; // The current dialogue node being repositioned in the editor
+        [NonSerialized] private Vector2 _dragOffset; // An offset to keep the mouse in the same position relative to the node it is dragging
+        [NonSerialized] private DialogueNode _pendingNode = null; // A reference to a new dialogue node we want to create when clicking the add node button
         
 
         [MenuItem("Window/Dialgoue Editor")] // An annotation to make this function called when clicking this menu item in the editor; For this to work, the function must be public, static, and return void
@@ -58,6 +60,7 @@ namespace Dialogue.Editor
             if( newDialogue != null ) 
             {
                 _selectedDialogue = newDialogue;
+                if (_selectedDialogue.IsEmpty()) _selectedDialogue.InitializeRootNode(); // Checks if the selected dialogue has any nodes and creates one if it doesnt
                 Repaint();
             }
         }
@@ -79,6 +82,13 @@ namespace Dialogue.Editor
                 foreach (DialogueNode node in _selectedDialogue.GetAllNodes())
                 {
                     DrawNode(node);
+                }
+
+                if (_pendingNode != null)
+                {
+                    Undo.RecordObject(_selectedDialogue, "Added Dialogue Node");
+                    _selectedDialogue.CreateNode(_pendingNode);
+                    _pendingNode = null;
                 }
             }
         }
@@ -112,8 +122,6 @@ namespace Dialogue.Editor
             GUILayout.BeginArea(node.rect, _nodeStyle);
             EditorGUI.BeginChangeCheck();
 
-            EditorGUILayout.LabelField("Node", EditorStyles.whiteLabel);
-            string newUniqueID = EditorGUILayout.TextField("ID: " + node.uniqueID);
             string newText = EditorGUILayout.TextField(node.text);
 
             if (EditorGUI.EndChangeCheck())
@@ -121,10 +129,12 @@ namespace Dialogue.Editor
                 Undo.RecordObject(_selectedDialogue, "Update Dialogue Text");
 
                 node.text = newText;
-                node.uniqueID = newUniqueID;
             }
 
-            
+             if (GUILayout.Button("Add Node"))
+             {
+                _pendingNode = node;
+             }
 
             GUILayout.EndArea();
         }
