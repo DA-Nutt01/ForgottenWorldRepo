@@ -109,8 +109,8 @@ namespace Dialogue.Editor
             EditorGUI.BeginChangeCheck();
 
             EditorGUILayout.LabelField("Node", EditorStyles.whiteLabel);
+            string newUniqueID = EditorGUILayout.TextField("ID: " + node.uniqueID);
             string newText = EditorGUILayout.TextField(node.text);
-            string newUniqueID = EditorGUILayout.TextField(node.uniqueID);
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -118,6 +118,11 @@ namespace Dialogue.Editor
 
                 node.text = newText;
                 node.uniqueID = newUniqueID;
+            }
+
+            foreach (DialogueNode childNode in _selectedDialogue.GetAllChildren(node))
+            {
+                EditorGUILayout.LabelField(childNode.text); 
             }
 
             GUILayout.EndArea();

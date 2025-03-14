@@ -10,6 +10,8 @@ namespace Dialogue
         [SerializeField] 
         List<DialogueNode> _nodes; // A list of the DialogueNode scriptable objects
 
+        Dictionary<string, DialogueNode> nodeLookup = new Dictionary<string, DialogueNode>(); 
+
 #if UNITY_EDITOR
         private void Awake()
         {
@@ -18,8 +20,21 @@ namespace Dialogue
             {
                 _nodes.Add(new DialogueNode());
             }
+
+            OnValidate();
         }
 #endif
+
+        private void OnValidate() // Called when a script instance is loaded or a value is updated in the editor
+        {
+            nodeLookup.Clear();
+
+            foreach (DialogueNode node in GetAllNodes())
+            {
+                nodeLookup[node.uniqueID] = node;
+            }
+        }
+
         public IEnumerable<DialogueNode> GetAllNodes()
         {
             // A getter function to return all nodes in this scriptable object
@@ -30,6 +45,22 @@ namespace Dialogue
         {
             return _nodes[0];
         }
+
+        public IEnumerable<DialogueNode> GetAllChildren(DialogueNode parentNode)
+        {
+            foreach (string childID in parentNode.childrenID) 
+            {
+                if (nodeLookup.ContainsKey(childID)) 
+                {
+                    yield return nodeLookup[childID];
+                }
+                else
+                {
+                    Debug.LogWarning($"Child ID {childID} not found in nodeLookup.");
+                }
+            }
+        }
     }
 
 }
+  
