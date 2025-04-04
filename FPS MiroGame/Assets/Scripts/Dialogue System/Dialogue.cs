@@ -55,6 +55,21 @@ namespace Dialogue
             OnValidate();
         }
 
+        public void DeleteNode(DialogueNode nodeToDelete)
+        {
+            _nodes.Remove(nodeToDelete);
+            CleanupNodeChildrenReferencesOnDeletion(nodeToDelete);
+            OnValidate();
+        }
+
+        private void CleanupNodeChildrenReferencesOnDeletion(DialogueNode nodeToDelete)
+        {
+            foreach (DialogueNode node in GetAllNodes())
+            {
+                node.childrenNodeIDs.Remove(nodeToDelete.uniqueID);
+            }
+        }
+
         public IEnumerable<DialogueNode> GetAllNodes()
         {
             // A getter function to return all nodes in this scriptable object

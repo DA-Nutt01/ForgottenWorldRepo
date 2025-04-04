@@ -15,8 +15,8 @@ namespace Dialogue.Editor
         [NonSerialized] private GUIStyle _nodeStyle; // Responsible for the styling of the node
         [NonSerialized] private DialogueNode _draggingNode = null; // The current dialogue node being repositioned in the editor
         [NonSerialized] private Vector2 _dragOffset; // An offset to keep the mouse in the same position relative to the node it is dragging
-        [NonSerialized] private DialogueNode _pendingNode = null; // A reference to a new dialogue node we want to create when clicking the add node button
-        
+        [NonSerialized] private DialogueNode _nodeToCreate = null; // A reference to a new dialogue node we want to create when clicking the add node button
+        [NonSerialized] private DialogueNode _nodeToDelete = null; // A reference to an existing dialogue node we want to delete when clicking the delete node button
 
         [MenuItem("Window/Dialgoue Editor")] // An annotation to make this function called when clicking this menu item in the editor; For this to work, the function must be public, static, and return void
         public static void ShowEditorWindow()
@@ -84,11 +84,18 @@ namespace Dialogue.Editor
                     DrawNode(node);
                 }
 
-                if (_pendingNode != null)
+                if (_nodeToCreate != null)
                 {
-                    Undo.RecordObject(_selectedDialogue, "Added Dialogue Node");
-                    _selectedDialogue.CreateNode(_pendingNode);
-                    _pendingNode = null;
+                    Undo.RecordObject(_selectedDialogue, "Node Created");
+                    _selectedDialogue.CreateNode(_nodeToCreate);
+                    _nodeToCreate = null;
+                }
+
+                if (_nodeToDelete != null)
+                {
+                    Undo.RecordObject(_selectedDialogue, "Node Deleted");
+                    _selectedDialogue.DeleteNode(_nodeToDelete);
+                    _nodeToDelete = null;
                 }
             }
         }
@@ -131,10 +138,19 @@ namespace Dialogue.Editor
                 node.text = newText;
             }
 
-             if (GUILayout.Button("Add Node"))
-             {
-                _pendingNode = node;
-             }
+            GUILayout.BeginHorizontal(); // Any GUI elements created after this call will be aligned horizontally until EndHorizontal is called
+
+            if (GUILayout.Button("Add"))
+            {
+                _nodeToCreate = node;
+            }
+
+            if (GUILayout.Button("Delete"))
+            {
+                _nodeToDelete = node;
+            }
+
+            GUILayout.EndHorizontal();
 
             GUILayout.EndArea();
         }
