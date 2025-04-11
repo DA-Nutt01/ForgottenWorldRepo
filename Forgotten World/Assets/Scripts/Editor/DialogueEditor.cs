@@ -17,6 +17,8 @@ namespace Dialogue.Editor
         [NonSerialized] private Vector2 _dragOffset; // An offset to keep the mouse in the same position relative to the node it is dragging
         [NonSerialized] private DialogueNode _nodeToCreate = null; // A reference to a new dialogue node we want to create when clicking the add node button
         [NonSerialized] private DialogueNode _nodeToDelete = null; // A reference to an existing dialogue node we want to delete when clicking the delete node button
+        [NonSerialized] private DialogueNode _linkignNode = null; // A ref the currently selected node that wants to link to another existing node as its parent node
+        private Vector2 _scrollPosition; // 
 
         [MenuItem("Window/Dialgoue Editor")] // An annotation to make this function called when clicking this menu item in the editor; For this to work, the function must be public, static, and return void
         public static void ShowEditorWindow()
@@ -41,7 +43,7 @@ namespace Dialogue.Editor
         }
 
         private void OnEnable()
-        {
+        {  
             Selection.selectionChanged += OnSelectionChanged;
 
             _nodeStyle = new GUIStyle();
@@ -74,6 +76,11 @@ namespace Dialogue.Editor
             else
             {
                 ProcessEvents();
+
+                _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
+
+                GUILayoutUtility.GetRect(4000, 4000);
+
                 foreach (DialogueNode node in _selectedDialogue.GetAllNodes())
                 {
                     DrawNodeConnections(node);
@@ -83,6 +90,8 @@ namespace Dialogue.Editor
                 {
                     DrawNode(node);
                 }
+
+                EditorGUILayout.EndScrollView();
 
                 if (_nodeToCreate != null)
                 {
@@ -106,7 +115,7 @@ namespace Dialogue.Editor
             // Node Repositioning
             if (Event.current.type == EventType.MouseDown && _draggingNode == null)
             {
-                _draggingNode = GetNodeAtPoint(Event.current.mousePosition);
+                _draggingNode = GetNodeAtPoint(Event.current.mousePosition + _scrollPosition);
                 if (_draggingNode != null)
                 {
                     _dragOffset = _draggingNode.rect.position - Event.current.mousePosition;
@@ -145,6 +154,8 @@ namespace Dialogue.Editor
                 _nodeToCreate = node;
             }
 
+            DrawLinkButtons(node);
+
             if (GUILayout.Button("Delete"))
             {
                 _nodeToDelete = node;
@@ -153,6 +164,42 @@ namespace Dialogue.Editor
             GUILayout.EndHorizontal();
 
             GUILayout.EndArea();
+        }
+
+        private void DrawLinkButtons(DialogueNode node)
+        {
+            if (_linkignNode == null)
+            {
+                if (GUILayout.Button("Link"))
+                {
+                    _linkignNode = node; 
+                }
+            } 
+            else if (_linkignNode == node)
+            {
+                if (GUILayout.Button("Cancel"))
+                {
+                    _linkignNode = null;
+                }
+            }
+            else if (_linkignNode.childrenNodeIDs.Contains(node.uniqueID))
+            {
+                if (GUILayout.Button("Unlink"))
+                {
+                    Undo.RecordObject(_selectedDialogue, "Remove Dialogue Link"); 
+                    _linkignNode.childrenNodeIDs.Remove(node.uniqueID); 
+                    _linkignNode = null;
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("Child"))
+                {
+                    Undo.RecordObject(_selectedDialogue, "Add Dialogue Link"); 
+                    _linkignNode.childrenNodeIDs.Add(node.uniqueID); 
+                    _linkignNode = null;
+                }
+            }
         }
 
         private void DrawNodeConnections(DialogueNode node)
