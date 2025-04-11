@@ -17,6 +17,7 @@ namespace Dialogue.Editor
         [NonSerialized] private Vector2 _dragOffset; // An offset to keep the mouse in the same position relative to the node it is dragging
         [NonSerialized] private DialogueNode _nodeToCreate = null; // A reference to a new dialogue node we want to create when clicking the add node button
         [NonSerialized] private DialogueNode _nodeToDelete = null; // A reference to an existing dialogue node we want to delete when clicking the delete node button
+        [NonSerialized] private DialogueNode _linkignNode = null; // A ref the currently selected node that wants to link to another existing node as its parent node
 
         [MenuItem("Window/Dialgoue Editor")] // An annotation to make this function called when clicking this menu item in the editor; For this to work, the function must be public, static, and return void
         public static void ShowEditorWindow()
@@ -41,7 +42,7 @@ namespace Dialogue.Editor
         }
 
         private void OnEnable()
-        {
+        {  
             Selection.selectionChanged += OnSelectionChanged;
 
             _nodeStyle = new GUIStyle();
@@ -144,6 +145,23 @@ namespace Dialogue.Editor
             {
                 _nodeToCreate = node;
             }
+
+            if (_linkignNode == null)
+            {
+                if (GUILayout.Button("Link"))
+                {
+                    _linkignNode = node; 
+                }
+            } 
+            else
+            {
+                if (GUILayout.Button("Child"))
+                {
+                    //Undo.RecordObject()
+                    _linkignNode = null;
+                }
+            }
+            
 
             if (GUILayout.Button("Delete"))
             {
