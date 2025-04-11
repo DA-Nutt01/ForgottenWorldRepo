@@ -146,22 +146,7 @@ namespace Dialogue.Editor
                 _nodeToCreate = node;
             }
 
-            if (_linkignNode == null)
-            {
-                if (GUILayout.Button("Link"))
-                {
-                    _linkignNode = node; 
-                }
-            } 
-            else
-            {
-                if (GUILayout.Button("Child"))
-                {
-                    //Undo.RecordObject()
-                    _linkignNode = null;
-                }
-            }
-            
+            DrawLinkButtons(node);
 
             if (GUILayout.Button("Delete"))
             {
@@ -171,6 +156,42 @@ namespace Dialogue.Editor
             GUILayout.EndHorizontal();
 
             GUILayout.EndArea();
+        }
+
+        private void DrawLinkButtons(DialogueNode node)
+        {
+            if (_linkignNode == null)
+            {
+                if (GUILayout.Button("Link"))
+                {
+                    _linkignNode = node; 
+                }
+            } 
+            else if (_linkignNode == node)
+            {
+                if (GUILayout.Button("Cancel"))
+                {
+                    _linkignNode = null;
+                }
+            }
+            else if (_linkignNode.childrenNodeIDs.Contains(node.uniqueID))
+            {
+                if (GUILayout.Button("Unlink"))
+                {
+                    Undo.RecordObject(_selectedDialogue, "Remove Dialogue Link"); 
+                    _linkignNode.childrenNodeIDs.Remove(node.uniqueID); 
+                    _linkignNode = null;
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("Child"))
+                {
+                    Undo.RecordObject(_selectedDialogue, "Add Dialogue Link"); 
+                    _linkignNode.childrenNodeIDs.Add(node.uniqueID); 
+                    _linkignNode = null;
+                }
+            }
         }
 
         private void DrawNodeConnections(DialogueNode node)
