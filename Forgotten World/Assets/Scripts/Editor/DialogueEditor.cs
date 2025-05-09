@@ -22,6 +22,9 @@ namespace Dialogue.Editor
         [NonSerialized] private bool _draggingCanvas = false; // A flag telling wether we are dragging on the editor canvas to scroll the view in the editor window
         [NonSerialized] private Vector2 _draggingCanvasOffset;
 
+        const float CANVASSIZE = 4000;
+        const float BACKGROUNDSIZE = 50;
+
         [MenuItem("Window/Dialgoue Editor")] // An annotation to make this function called when clicking this menu item in the editor; For this to work, the function must be public, static, and return void
         public static void ShowEditorWindow()
         {
@@ -81,16 +84,20 @@ namespace Dialogue.Editor
 
                 _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 
-                GUILayoutUtility.GetRect(4000, 4000);
+                Rect editorCanvas = GUILayoutUtility.GetRect(CANVASSIZE, CANVASSIZE); // Create & store a rectangle for the dimensions of the editor window 
+                Texture2D backgroundTexture = Resources.Load("background") as Texture2D; // from the Resourcs folder in the editor folder, load the background texture and cache it
 
-                foreach (DialogueNode node in _selectedDialogue.GetAllNodes())
+                Rect textCoords = new Rect(0, 0, CANVASSIZE / BACKGROUNDSIZE, CANVASSIZE / BACKGROUNDSIZE);
+                GUI.DrawTextureWithTexCoords(editorCanvas, backgroundTexture, textCoords);
+
+                foreach (DialogueNode node in _selectedDialogue.GetAllNodes()) // For each DialogueNOde in the selected Dialogue
                 {
-                    DrawNodeConnections(node);
+                    DrawNodeConnections(node); // Draw all connections between nodes
                 }
 
-                foreach (DialogueNode node in _selectedDialogue.GetAllNodes())
+                foreach (DialogueNode node in _selectedDialogue.GetAllNodes()) // For each DialogueNode in the selected Dialogue
                 {
-                    DrawNode(node);
+                    DrawNode(node); // Draw that node
                 }
 
                 EditorGUILayout.EndScrollView();
