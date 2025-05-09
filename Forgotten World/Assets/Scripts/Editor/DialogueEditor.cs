@@ -19,6 +19,8 @@ namespace Dialogue.Editor
         [NonSerialized] private DialogueNode _nodeToDelete = null; // A reference to an existing dialogue node we want to delete when clicking the delete node button
         [NonSerialized] private DialogueNode _linkignNode = null; // A ref the currently selected node that wants to link to another existing node as its parent node
         private Vector2 _scrollPosition; // 
+        [NonSerialized] private bool _draggingCanvas = false; // A flag telling wether we are dragging on the editor canvas to scroll the view in the editor window
+        [NonSerialized] private Vector2 _draggingCanvasOffset;
 
         [MenuItem("Window/Dialgoue Editor")] // An annotation to make this function called when clicking this menu item in the editor; For this to work, the function must be public, static, and return void
         public static void ShowEditorWindow()
@@ -120,16 +122,34 @@ namespace Dialogue.Editor
                 {
                     _dragOffset = _draggingNode.rect.position - Event.current.mousePosition;
                 }
+                else // we have not clicked on a node but instead, the canvas
+                {
+                    _draggingCanvas = true;
+                    _draggingCanvasOffset = Event.current.mousePosition + _scrollPosition; // Record Offset for dragging the view by selected point on canvas
+                }
+                
             }
             else if (Event.current.type == EventType.MouseDrag && _draggingNode != null)
             {
                 Undo.RecordObject(_selectedDialogue, "Move Dialogue Node");
                 _draggingNode.rect.position = Event.current.mousePosition + _dragOffset;
+
+                // Update Scroll position
+                GUI.changed = true;
+            }
+            else if (Event.current.type == EventType.MouseDrag && _draggingCanvas)
+            {
+                _scrollPosition = _draggingCanvasOffset - Event.current.mousePosition; // Update teh scroll position so the scroll position remains the same while dragging
+
                 GUI.changed = true;
             }
             else if (Event.current.type == EventType.MouseUp && _draggingNode != null)
             {
                 _draggingNode = null;
+            }
+            else if (Event.current.type == EventType.MouseUp && _draggingCanvas) // when we unclick the mouse while  dragging the canvas
+            {
+                _draggingCanvas = false;
             }
         }
 
