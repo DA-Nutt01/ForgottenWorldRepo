@@ -122,17 +122,19 @@ namespace Dialogue.Editor
         {
             
             // Node Repositioning
-            if (Event.current.type == EventType.MouseDown && _draggingNode == null)
+            if (Event.current.type == EventType.MouseDown && _draggingNode == null) // if we click mouse down while not dragging a node
             {
-                _draggingNode = GetNodeAtPoint(Event.current.mousePosition + _scrollPosition);
+                _draggingNode = GetNodeAtPoint(Event.current.mousePosition + _scrollPosition); // We have clicked on a dialogue node
                 if (_draggingNode != null)
                 {
                     _dragOffset = _draggingNode.rect.position - Event.current.mousePosition;
+                    Selection.activeObject = _draggingNode; // Show selected dialogueNode in inspector
                 }
                 else // we have not clicked on a node but instead, the canvas
                 {
                     _draggingCanvas = true;
                     _draggingCanvasOffset = Event.current.mousePosition + _scrollPosition; // Record Offset for dragging the view by selected point on canvas
+                    Selection.activeObject = _selectedDialogue; // Show the whole dialogue object in the inspector
                 }
                 
             }
@@ -209,12 +211,12 @@ namespace Dialogue.Editor
                     _linkignNode = null;
                 }
             }
-            else if (_linkignNode.childrenNodeIDs.Contains(node.uniqueID))
+            else if (_linkignNode.childrenNodeIDs.Contains(node.name))
             {
                 if (GUILayout.Button("Unlink"))
                 {
                     Undo.RecordObject(_selectedDialogue, "Remove Dialogue Link"); 
-                    _linkignNode.childrenNodeIDs.Remove(node.uniqueID); 
+                    _linkignNode.childrenNodeIDs.Remove(node.name); 
                     _linkignNode = null;
                 }
             }
@@ -223,7 +225,7 @@ namespace Dialogue.Editor
                 if (GUILayout.Button("Child"))
                 {
                     Undo.RecordObject(_selectedDialogue, "Add Dialogue Link"); 
-                    _linkignNode.childrenNodeIDs.Add(node.uniqueID); 
+                    _linkignNode.childrenNodeIDs.Add(node.name); 
                     _linkignNode = null;
                 }
             }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using System;
 
 namespace Dialogue
@@ -17,8 +18,8 @@ namespace Dialogue
         {
             //Creates the root node for the dialogue
             _nodes.Clear(); // Clear the nodes list 
-            DialogueNode rootNode = new DialogueNode(); // Construct a new Dialogue Node
-            rootNode.uniqueID = Guid.NewGuid().ToString(); // Assign the new root node a unique ID
+            DialogueNode rootNode = CreateNode(null); // Construct a new Dialogue Node
+            rootNode.name = Guid.NewGuid().ToString(); // Assign the new root node a unique ID
             _nodes.Add(rootNode); // Add the root node to the nodes list
             OnValidate();
         }
@@ -32,41 +33,42 @@ namespace Dialogue
         {
             if (_nodes.Count == 0)
             {
-                Debug.Log("Count is 0");
-                DialogueNode rootNode = new DialogueNode();
-                rootNode.uniqueID = Guid.NewGuid().ToString();
-                _nodes.Add(rootNode);
+                CreateNode(null);
             }
 
             nodeLookup.Clear();
 
             foreach (DialogueNode node in GetAllNodes())
             {
-                nodeLookup[node.uniqueID] = node;
+                nodeLookup[node.name] = node;
             }
         }
 
-        public void CreateNode(DialogueNode parentNode)
+        public DialogueNode CreateNode(DialogueNode parentNode)
         {
-            DialogueNode newNode = new DialogueNode();
-            newNode.uniqueID = Guid.NewGuid().ToString();
-            parentNode.childrenNodeIDs.Add(newNode.uniqueID);
+            DialogueNode newNode = ScriptableObject.CreateInstance<DialogueNode>();
+            newNode.name = Guid.NewGuid().ToString();
+            Undo.RegisterCreatedObjectUndo(newNode, "Created Dialogue Node");
+            if (parentNode != null) parentNode.childrenNodeIDs.Add(newNode.name);
             _nodes.Add(newNode);
             OnValidate();
+            return newNode;
         }
 
         public void DeleteNode(DialogueNode nodeToDelete)
         {
             _nodes.Remove(nodeToDelete);
-            CleanupNodeChildrenReferencesOnDeletion(nodeToDelete);
             OnValidate();
+            CleanupNodeChildrenReferencesOnDeletion(nodeToDelete);
+             Undo.DestroyObjectImmediate(nodeToDelete);
+            
         }
 
         private void CleanupNodeChildrenReferencesOnDeletion(DialogueNode nodeToDelete)
         {
             foreach (DialogueNode node in GetAllNodes())
             {
-                node.childrenNodeIDs.Remove(nodeToDelete.uniqueID);
+                node.childrenNodeIDs.Remove(nodeToDelete.name);
             }
         }
 
