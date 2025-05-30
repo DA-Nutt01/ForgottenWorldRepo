@@ -7,9 +7,9 @@ using System;
 namespace Dialogue
 {
     [CreateAssetMenu(fileName = "New Dialogue", menuName = "Dialogue", order = 0)]
-    public class Dialogue : ScriptableObject
+    public class Dialogue : ScriptableObject, ISerializationCallbackReceiver
     {
-        [SerializeField] 
+        [SerializeField]
         List<DialogueNode> _nodes = new List<DialogueNode>(); // A list of the DialogueNode scriptable objects
 
         Dictionary<string, DialogueNode> nodeLookup = new Dictionary<string, DialogueNode>(); // A dictionary of all dialogue nodes in this dialogue
@@ -31,10 +31,7 @@ namespace Dialogue
 
         private void OnValidate() // Called when a script instance is loaded or a value is updated in the editor
         {
-            if (_nodes.Count == 0)
-            {
-                CreateNode(null);
-            }
+
 
             nodeLookup.Clear();
 
@@ -44,33 +41,48 @@ namespace Dialogue
             }
         }
 
+#if UNITY_EDITOR
         public DialogueNode CreateNode(DialogueNode parentNode)
         {
-            DialogueNode newNode = ScriptableObject.CreateInstance<DialogueNode>();
-            newNode.name = Guid.NewGuid().ToString();
+            DialogueNode newNode = MakeNode(parentNode);
             Undo.RegisterCreatedObjectUndo(newNode, "Created Dialogue Node");
-            if (parentNode != null) parentNode.childrenNodeIDs.Add(newNode.name);
-            _nodes.Add(newNode);
-            OnValidate();
+            Undo.RecordObject(this, "Node Created");
+            AddNode(newNode);
             return newNode;
         }
 
         public void DeleteNode(DialogueNode nodeToDelete)
         {
+             Undo.RecordObject(this, "Node Deleted");
             _nodes.Remove(nodeToDelete);
             OnValidate();
             CleanupNodeChildrenReferencesOnDeletion(nodeToDelete);
-             Undo.DestroyObjectImmediate(nodeToDelete);
-            
+            Undo.DestroyObjectImmediate(nodeToDelete);
+
+        }
+
+        private void AddNode(DialogueNode newNode)
+        {
+            _nodes.Add(newNode);
+            OnValidate();
+        }
+
+        private static DialogueNode MakeNode(DialogueNode parentNode)
+        {
+            DialogueNode newNode = ScriptableObject.CreateInstance<DialogueNode>();
+            newNode.name = Guid.NewGuid().ToString();
+            if (parentNode != null) parentNode.AddChildID(newNode.name);
+            return newNode;
         }
 
         private void CleanupNodeChildrenReferencesOnDeletion(DialogueNode nodeToDelete)
         {
             foreach (DialogueNode node in GetAllNodes())
             {
-                node.childrenNodeIDs.Remove(nodeToDelete.name);
+                node.RemoveChildID(nodeToDelete.name);
             }
         }
+#endif
 
         public IEnumerable<DialogueNode> GetAllNodes()
         {
@@ -86,9 +98,9 @@ namespace Dialogue
         public IEnumerable<DialogueNode> GetAllChildren(DialogueNode parentNode)
         {
 
-            foreach (string childID in parentNode.childrenNodeIDs) 
+            foreach (string childID in parentNode.GetChildrenNodesIDs())
             {
-                if (nodeLookup.ContainsKey(childID)) 
+                if (nodeLookup.ContainsKey(childID))
                 {
                     yield return nodeLookup[childID];
                 }
@@ -97,6 +109,32 @@ namespace Dialogue
                     Debug.LogWarning($"Child ID {childID} not found in nodeLookup.");
                 }
             }
+        }
+
+        public void OnBeforeSerialize()
+        {
+#if UNITY_EDITOR
+            if (_nodes.Count == 0)
+            {
+                DialogueNode newNode = MakeNode(null);
+                AddNode(newNode);
+            }
+
+            if (AssetDatabase.GetAssetPath(this) != "")
+            {
+                foreach (DialogueNode node in GetAllNodes())
+                {
+                    if (AssetDatabase.GetAssetPath(node) == "")
+                    {
+                        AssetDatabase.AddObjectToAsset(node, this); // Add this new node as a sub asset to this dialogue scriptable object
+                    }
+                }
+            }
+#endif
+        }
+
+        public void OnAfterDeserialize()
+        {
         }
     }
 
