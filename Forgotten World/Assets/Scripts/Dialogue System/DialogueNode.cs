@@ -34,24 +34,28 @@ namespace Dialogue
         {
             Undo.RecordObject(this, "Move Dialogue Node");
             rect.position = newPosition;
+            EditorUtility.SetDirty(this);
         }
 
         public void SetText(string newText)
         {
             Undo.RecordObject(this, "Update Dialogue Text");
             if (newText != text) text = newText;
+            EditorUtility.SetDirty(this);
         }
 
         public void AddChildID(string childID)
         {
             Undo.RecordObject(this, "Add Dialogue Link");
             childrenNodeIDs.Add(childID);
+            EditorUtility.SetDirty(this);
         }
 
         public void RemoveChildID (string childID)
         {
             Undo.RecordObject(this, "Remove Dialogue Link");
             childrenNodeIDs.Remove(childID);
+            EditorUtility.SetDirty(this);
         }
 #endif
     }
