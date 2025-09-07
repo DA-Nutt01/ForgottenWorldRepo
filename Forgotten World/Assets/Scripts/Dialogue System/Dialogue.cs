@@ -12,6 +12,8 @@ namespace Dialogue
         [SerializeField]
         List<DialogueNode> _nodes = new List<DialogueNode>(); // A list of the DialogueNode scriptable objects
 
+        [SerializeField]
+        Vector2 newNodeOffset = new Vector2(250, 0);
         Dictionary<string, DialogueNode> nodeLookup = new Dictionary<string, DialogueNode>(); // A dictionary of all dialogue nodes in this dialogue
 
         public void InitializeRootNode()
@@ -67,11 +69,16 @@ namespace Dialogue
             OnValidate();
         }
 
-        private static DialogueNode MakeNode(DialogueNode parentNode)
+        private DialogueNode MakeNode(DialogueNode parentNode)
         {
             DialogueNode newNode = ScriptableObject.CreateInstance<DialogueNode>();
             newNode.name = Guid.NewGuid().ToString();
-            if (parentNode != null) parentNode.AddChildID(newNode.name);
+            if (parentNode != null)
+            {
+                parentNode.AddChildID(newNode.name);
+                newNode.SetPlayerSpeaking(!parentNode.IsPlayerSpeaking());
+                newNode.SetPosition(parentNode.GetRect().position + newNodeOffset);
+            }
             return newNode;
         }
 

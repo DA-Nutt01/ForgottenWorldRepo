@@ -13,6 +13,7 @@ namespace Dialogue.Editor
         private Dialogue _selectedDialogue = null; // The currently opened Dialogue scriptable object
         
         [NonSerialized] private GUIStyle _nodeStyle; // Responsible for the styling of the node
+        [NonSerialized] private GUIStyle _playerNodeStyle; // Resposingle for styling nodes belonging to the Player 
         [NonSerialized] private DialogueNode _draggingNode = null; // The current dialogue node being repositioned in the editor
         [NonSerialized] private Vector2 _dragOffset; // An offset to keep the mouse in the same position relative to the node it is dragging
         [NonSerialized] private DialogueNode _nodeToCreate = null; // A reference to a new dialogue node we want to create when clicking the add node button
@@ -48,7 +49,7 @@ namespace Dialogue.Editor
         }
 
         private void OnEnable()
-        {  
+        {
             Selection.selectionChanged += OnSelectionChanged;
 
             _nodeStyle = new GUIStyle();
@@ -56,6 +57,13 @@ namespace Dialogue.Editor
             _nodeStyle.normal.textColor = Color.white;
             _nodeStyle.padding = new RectOffset(20, 20, 20, 20);
             _nodeStyle.border = new RectOffset(12, 12, 12, 12);
+            
+            _playerNodeStyle = new GUIStyle();
+            _playerNodeStyle.normal.background = EditorGUIUtility.Load("node1") as Texture2D;
+            _playerNodeStyle.normal.textColor = Color.white;
+            _playerNodeStyle.padding = new RectOffset(20, 20, 20, 20);
+            _playerNodeStyle.border = new RectOffset(12, 12, 12, 12);
+            
             
         }
 
@@ -161,7 +169,14 @@ namespace Dialogue.Editor
 
         private void DrawNode(DialogueNode node)
         {
-            GUILayout.BeginArea(node.GetRect(), _nodeStyle);
+            GUIStyle style = _nodeStyle; // Store the current node style for the node about to be drawn
+
+            if (node.IsPlayerSpeaking())
+            {
+                style = _playerNodeStyle;
+            }
+
+            GUILayout.BeginArea(node.GetRect(), style);
             EditorGUI.BeginChangeCheck();
 
             node.SetText(EditorGUILayout.TextField(node.GetText()));
