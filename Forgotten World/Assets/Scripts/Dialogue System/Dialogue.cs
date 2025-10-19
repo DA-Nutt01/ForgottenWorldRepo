@@ -1,24 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using System;
 
 namespace Dialogue
 {
     [CreateAssetMenu(fileName = "New Dialogue", menuName = "Dialogue", order = 0)]
-    public class Dialogue : ScriptableObject
+    public class Dialogue : ScriptableObject, ISerializationCallbackReceiver
     {
-        [SerializeField] 
+        [SerializeField]
         List<DialogueNode> _nodes = new List<DialogueNode>(); // A list of the DialogueNode scriptable objects
 
+        [SerializeField]
+        Vector2 newNodeOffset = new Vector2(250, 0);
         Dictionary<string, DialogueNode> nodeLookup = new Dictionary<string, DialogueNode>(); // A dictionary of all dialogue nodes in this dialogue
 
         public void InitializeRootNode()
         {
             //Creates the root node for the dialogue
             _nodes.Clear(); // Clear the nodes list 
-            DialogueNode rootNode = new DialogueNode(); // Construct a new Dialogue Node
-            rootNode.uniqueID = Guid.NewGuid().ToString(); // Assign the new root node a unique ID
+            DialogueNode rootNode = CreateNode(null); // Construct a new Dialogue Node
+            rootNode.name = Guid.NewGuid().ToString(); // Assign the new root node a unique ID
             _nodes.Add(rootNode); // Add the root node to the nodes list
             OnValidate();
         }
@@ -30,45 +33,63 @@ namespace Dialogue
 
         private void OnValidate() // Called when a script instance is loaded or a value is updated in the editor
         {
-            if (_nodes.Count == 0)
-            {
-                Debug.Log("Count is 0");
-                DialogueNode rootNode = new DialogueNode();
-                rootNode.uniqueID = Guid.NewGuid().ToString();
-                _nodes.Add(rootNode);
-            }
+
 
             nodeLookup.Clear();
 
             foreach (DialogueNode node in GetAllNodes())
             {
-                nodeLookup[node.uniqueID] = node;
+                nodeLookup[node.name] = node;
             }
         }
 
-        public void CreateNode(DialogueNode parentNode)
+#if UNITY_EDITOR
+        public DialogueNode CreateNode(DialogueNode parentNode)
         {
-            DialogueNode newNode = new DialogueNode();
-            newNode.uniqueID = Guid.NewGuid().ToString();
-            parentNode.childrenNodeIDs.Add(newNode.uniqueID);
-            _nodes.Add(newNode);
-            OnValidate();
+            DialogueNode newNode = MakeNode(parentNode);
+            Undo.RegisterCreatedObjectUndo(newNode, "Created Dialogue Node");
+            Undo.RecordObject(this, "Node Created");
+            AddNode(newNode);
+            return newNode;
         }
 
         public void DeleteNode(DialogueNode nodeToDelete)
         {
+             Undo.RecordObject(this, "Node Deleted");
             _nodes.Remove(nodeToDelete);
-            CleanupNodeChildrenReferencesOnDeletion(nodeToDelete);
             OnValidate();
+            CleanupNodeChildrenReferencesOnDeletion(nodeToDelete);
+            Undo.DestroyObjectImmediate(nodeToDelete);
+
+        }
+
+        private void AddNode(DialogueNode newNode)
+        {
+            _nodes.Add(newNode);
+            OnValidate();
+        }
+
+        private DialogueNode MakeNode(DialogueNode parentNode)
+        {
+            DialogueNode newNode = ScriptableObject.CreateInstance<DialogueNode>();
+            newNode.name = Guid.NewGuid().ToString();
+            if (parentNode != null)
+            {
+                parentNode.AddChildID(newNode.name);
+                newNode.SetPlayerSpeaking(!parentNode.IsPlayerSpeaking());
+                newNode.SetPosition(parentNode.GetRect().position + newNodeOffset);
+            }
+            return newNode;
         }
 
         private void CleanupNodeChildrenReferencesOnDeletion(DialogueNode nodeToDelete)
         {
             foreach (DialogueNode node in GetAllNodes())
             {
-                node.childrenNodeIDs.Remove(nodeToDelete.uniqueID);
+                node.RemoveChildID(nodeToDelete.name);
             }
         }
+#endif
 
         public IEnumerable<DialogueNode> GetAllNodes()
         {
@@ -84,9 +105,9 @@ namespace Dialogue
         public IEnumerable<DialogueNode> GetAllChildren(DialogueNode parentNode)
         {
 
-            foreach (string childID in parentNode.childrenNodeIDs) 
+            foreach (string childID in parentNode.GetChildrenNodesIDs())
             {
-                if (nodeLookup.ContainsKey(childID)) 
+                if (nodeLookup.ContainsKey(childID))
                 {
                     yield return nodeLookup[childID];
                 }
@@ -95,6 +116,32 @@ namespace Dialogue
                     Debug.LogWarning($"Child ID {childID} not found in nodeLookup.");
                 }
             }
+        }
+
+        public void OnBeforeSerialize()
+        {
+#if UNITY_EDITOR
+            if (_nodes.Count == 0)
+            {
+                DialogueNode newNode = MakeNode(null);
+                AddNode(newNode);
+            }
+
+            if (AssetDatabase.GetAssetPath(this) != "")
+            {
+                foreach (DialogueNode node in GetAllNodes())
+                {
+                    if (AssetDatabase.GetAssetPath(node) == "")
+                    {
+                        AssetDatabase.AddObjectToAsset(node, this); // Add this new node as a sub asset to this dialogue scriptable object
+                    }
+                }
+            }
+#endif
+        }
+
+        public void OnAfterDeserialize()
+        {
         }
     }
 
