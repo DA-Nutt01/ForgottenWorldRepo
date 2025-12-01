@@ -16,6 +16,7 @@ using UnityEngine.InputSystem;
  * EX. private Rigidbody rb; 
  * EX. public bool isGameOver = false;
  */
+ 
 
 [DefaultExecutionOrder(100)]
 //collects and manage input from the player
