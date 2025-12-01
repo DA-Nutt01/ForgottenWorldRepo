@@ -65,9 +65,9 @@ public class InputManager : MonoBehaviour
         }
 
         //initilize variables
-        m_MoveAction = InputSystem.actions.FindAction("Move");
-        m_LookAction = InputSystem.actions.FindAction("Look");
-        m_JumpAction = InputSystem.actions.FindAction("Jump");
+        m_MoveAction = m_InputActions.FindAction("Move");
+        m_LookAction = m_InputActions.FindAction("Look");
+        m_JumpAction = m_InputActions.FindAction("Jump");
     }
 
     private void Update()
