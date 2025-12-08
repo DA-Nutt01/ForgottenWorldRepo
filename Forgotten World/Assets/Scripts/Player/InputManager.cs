@@ -27,7 +27,7 @@ public class InputManager : MonoBehaviour
     //attribute variable makes private variable public
     [Header("Components"), Space(5)]
     [SerializeField] private InputActionAsset m_InputActions;
-    [SerializeField] private Rigidbody m_RigBody;
+    [SerializeField] private Rigidbody m_RigidBody;
 
     //player input actions (stores player action variables)
     private InputAction m_MoveAction;
@@ -36,9 +36,13 @@ public class InputManager : MonoBehaviour
 
     private Vector2 m_MoveAmount;
     private Vector2 m_LookAmount;
+    private float m_VericalRotation = 0f; 
 
+    [SerializeField] GameObject m_Cam;
     [SerializeField] private float m_WalkSpeed = 5f;
     [SerializeField] private float m_JumpHeight = 10f;
+    [SerializeField] private float m_LookSpeed = 1f;
+    [SerializeField] private float m_VerticalRotationLimit = 80f; 
 
 
     private void OnEnable()
@@ -69,13 +73,50 @@ public class InputManager : MonoBehaviour
         m_MoveAction = m_InputActions.FindAction("Move");
         m_LookAction = m_InputActions.FindAction("Look");
         m_JumpAction = m_InputActions.FindAction("Jump");
+
+        m_RigidBody = GetComponent<Rigidbody>();
     }
 
     private void Update()
     {
-        //step 1: read the movement values from the action
+        // Read the movement and look values from the action
         m_MoveAmount = m_MoveAction.ReadValue<Vector2>();
-        //step 2: take the input and then apply the input to move the player to the desired place
-        Debug.Log(m_MoveAmount);
+        
+        m_LookAmount = m_LookAction.ReadValue<Vector2>();
+
+        if (m_JumpAction.WasPressedThisFrame()){
+            HandleJump();
+        }
+    }
+
+    private void FixedUpdate(){
+        // Using the input to move the camera and player
+        HandleMovement();
+        HandleLooking();
+
+    }
+
+    private void HandleJump(){
+        // Make the player jump based on the jump height
+        m_RigidBody.AddForce(Vector3.up * m_JumpHeight, ForceMode.Impulse);
+        Debug.Log("You Just Jumped!");
+    }
+
+    private void HandleMovement(){
+        // Move the player based on the movement input and walk speed
+        m_RigidBody.MovePosition(m_RigidBody.position + transform.forward * m_MoveAmount.y * m_WalkSpeed * Time.fixedDeltaTime +
+        transform.right * m_MoveAmount.x * m_WalkSpeed * Time.fixedDeltaTime);
+    }   
+
+    private void HandleLooking(){
+        // Rotate the camera based on the look input
+        transform.Rotate(Vector3.up * m_LookAmount.x * m_LookSpeed);
+
+        // Calculate vertical rotation
+        m_VericalRotation -= m_LookAmount.y * m_LookSpeed;
+        m_VericalRotation = Mathf.Clamp(m_VericalRotation, -m_VerticalRotationLimit, m_VerticalRotationLimit);
+
+        //Apply vertical rotation to camera only
+        m_Cam.transform.localRotation = Quaternion.Euler(m_VericalRotation, 0f, 0f);
     }
 }
