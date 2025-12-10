@@ -28,7 +28,14 @@ public class InputManager : MonoBehaviour
     [Header("Components"), Space(5)]
     [SerializeField] private InputActionAsset m_InputActions;
     [SerializeField] private Rigidbody m_RigidBody;
+    // Create a private vvar of type GameObject named m_GroundDetector, do not assign it a valu 
+    [SerializeField] private GameObject m_GroundDetector;
 
+    [Header("Configuration")]
+    [SerializeField] float m_GroundDetectionRadius = .25f;
+    [SerializeField] private LayerMask m_GroundLayer;
+
+    [Header("Player Settings"), Space(5)]
     //player input actions (stores player action variables)
     private InputAction m_MoveAction;
     private InputAction m_LookAction;
@@ -37,7 +44,7 @@ public class InputManager : MonoBehaviour
     private Vector2 m_MoveAmount;
     private Vector2 m_LookAmount;
     private float m_VericalRotation = 0f; 
-
+    
     [SerializeField] GameObject m_Cam;
     [SerializeField] private float m_WalkSpeed = 5f;
     [SerializeField] private float m_JumpHeight = 10f;
@@ -77,6 +84,14 @@ public class InputManager : MonoBehaviour
         m_RigidBody = GetComponent<Rigidbody>();
     }
 
+    private void Start() {
+        // Lock the cursor to the center of the screen
+        Cursor.lockState = CursorLockMode.Locked;
+
+        // Hide the cursor
+        //Cursor.visible = false;
+    }
+
     private void Update()
     {
         // Read the movement and look values from the action
@@ -97,9 +112,22 @@ public class InputManager : MonoBehaviour
     }
 
     private void HandleJump(){
-        // Make the player jump based on the jump height
-        m_RigidBody.AddForce(Vector3.up * m_JumpHeight, ForceMode.Impulse);
-        Debug.Log("You Just Jumped!");
+        Debug.Log("Trying To Jump");
+        // Check if the player is on the ground
+        // Step 1: Use Physics.Overlap sphere to see if the player's feet is touching the ground
+        Collider[] arry = Physics.OverlapSphere(m_GroundDetector.transform.position, m_GroundDetectionRadius, m_GroundLayer);
+
+        if (arry.Length > 0){ // The player is on the ground
+            // Make the player jump based on the jump height
+            m_RigidBody.AddForce(Vector3.up * m_JumpHeight, ForceMode.Impulse);
+            Debug.Log("Succesful Jump");
+        } else {
+            Debug.Log("Jump Failed");
+        }
+
+    
+        // Detect when the player is on the ground
+        // To double jump, player must be off the ground, has not already double jumped, & the jump button pressed
     }
 
     private void HandleMovement(){
@@ -118,5 +146,12 @@ public class InputManager : MonoBehaviour
 
         //Apply vertical rotation to camera only
         m_Cam.transform.localRotation = Quaternion.Euler(m_VericalRotation, 0f, 0f);
+    }
+
+    private void OnDrawGizmos(){
+         // Set the color with custom alpha
+        Gizmos.color = new Color(1f, 0f, 0f); // Red with custom alpha
+
+        Gizmos.DrawWireSphere(m_GroundDetector.transform.position, m_GroundDetectionRadius);
     }
 }
