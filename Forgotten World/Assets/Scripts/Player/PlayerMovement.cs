@@ -11,16 +11,21 @@ public class PlayerMovement : MonoBehaviour
     [Header("Configuration")]
     [SerializeField] float m_GroundDetectionRadius = .25f;
     [SerializeField] private LayerMask m_GroundLayer;
-
-    private Vector2 m_MoveAmount;
-    private Vector2 m_LookAmount;
-    private float m_VericalRotation = 0f; 
     
     [SerializeField] GameObject m_Cam;
     [SerializeField] private float m_WalkSpeed = 5f;
     [SerializeField] private float m_JumpHeight = 10f;
     [SerializeField] private float m_LookSpeed = 1f;
     [SerializeField] private float m_VerticalRotationLimit = 80f; 
+    [SerializeField][Tooltip("The num of times that player has jumped without touching the ground. Resets once player touches ground")]
+    private int m_JumpCount = 0;
+    [SerializeField][Tooltip("The max num of times the player can consecutive")]
+    private int m_JumpCap = 2;
+    
+    private Vector2 m_MoveAmount;
+    private Vector2 m_LookAmount;
+    private float m_VericalRotation = 0f; 
+    
 
     private void Awake()
     {
@@ -36,6 +41,7 @@ public class PlayerMovement : MonoBehaviour
 
         // Initialize Members
         m_RigidBody = GetComponent<Rigidbody>();
+        m_JumpCount = 0;
     }
 
     public void HandleLooking(Vector2 lookAmount){
@@ -65,8 +71,18 @@ public class PlayerMovement : MonoBehaviour
 
         if (arry.Length > 0){ // The player is on the ground
             // Make the player jump based on the jump height
+            m_JumpCount = 0; // Reset the jump count
             m_RigidBody.AddForce(Vector3.up * m_JumpHeight, ForceMode.Impulse);
+            m_JumpCount ++;
             Debug.Log("Succesful Jump");
+        } else if (arry.Length <= 0 ){
+            // Check if the player is able to double jump
+            if (m_JumpCount < m_JumpCap){
+                // Double Jump
+                m_RigidBody.AddForce(Vector3.up * m_JumpHeight, ForceMode.Impulse);
+                m_JumpCount ++;
+                Debug.Log("Succesful Double-Jump");
+            } 
         } else {
             Debug.Log("Jump Failed");
         }
