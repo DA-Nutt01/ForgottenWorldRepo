@@ -27,13 +27,13 @@ public class InputManager : MonoBehaviour
     //attribute variable makes private variable public
     [Header("Components"), Space(5)]
     [SerializeField] private InputActionAsset m_InputActions;
-    [SerializeField] private Rigidbody m_RigidBody;
+   // [SerializeField] private Rigidbody m_RigidBody;
     // Create a private vvar of type GameObject named m_GroundDetector, do not assign it a valu 
-    [SerializeField] private GameObject m_GroundDetector;
+   // [SerializeField] private GameObject m_GroundDetector;
 
-    [Header("Configuration")]
-    [SerializeField] float m_GroundDetectionRadius = .25f;
-    [SerializeField] private LayerMask m_GroundLayer;
+    // [Header("Configuration")]
+    // [SerializeField] float m_GroundDetectionRadius = .25f;
+    // [SerializeField] private LayerMask m_GroundLayer;
 
     [Header("Player Settings"), Space(5)]
     //player input actions (stores player action variables)
@@ -41,15 +41,15 @@ public class InputManager : MonoBehaviour
     private InputAction m_LookAction;
     private InputAction m_JumpAction;
 
-    private Vector2 m_MoveAmount;
-    private Vector2 m_LookAmount;
-    private float m_VericalRotation = 0f; 
+    // private Vector2 m_MoveAmount;
+    // private Vector2 m_LookAmount;
+    // private float m_VericalRotation = 0f; 
     
-    [SerializeField] GameObject m_Cam;
-    [SerializeField] private float m_WalkSpeed = 5f;
-    [SerializeField] private float m_JumpHeight = 10f;
-    [SerializeField] private float m_LookSpeed = 1f;
-    [SerializeField] private float m_VerticalRotationLimit = 80f; 
+    // [SerializeField] GameObject m_Cam;
+    // [SerializeField] private float m_WalkSpeed = 5f;
+    // [SerializeField] private float m_JumpHeight = 10f;
+    // [SerializeField] private float m_LookSpeed = 1f;
+    // [SerializeField] private float m_VerticalRotationLimit = 80f; 
 
 
     private void OnEnable()
@@ -81,7 +81,7 @@ public class InputManager : MonoBehaviour
         m_LookAction = m_InputActions.FindAction("Look");
         m_JumpAction = m_InputActions.FindAction("Jump");
 
-        m_RigidBody = GetComponent<Rigidbody>();
+        // m_RigidBody = GetComponent<Rigidbody>();
     }
 
     private void Start() {
@@ -94,64 +94,19 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
-        // Read the movement and look values from the action
-        m_MoveAmount = m_MoveAction.ReadValue<Vector2>();
-        
-        m_LookAmount = m_LookAction.ReadValue<Vector2>();
-
         if (m_JumpAction.WasPressedThisFrame()){
-            HandleJump();
+           // Tell PlayerMovement to jump
+           PlayerMovement.Instance.HandleJump();
         }
     }
 
     private void FixedUpdate(){
+        // Read the movement and look values from the action
+        Vector2 moveAmount = m_MoveAction.ReadValue<Vector2>();
+        Vector2 lookAmount = m_LookAction.ReadValue<Vector2>();
+
         // Using the input to move the camera and player
-        HandleMovement();
-        HandleLooking();
-
-    }
-
-    private void HandleJump(){
-        Debug.Log("Trying To Jump");
-        // Check if the player is on the ground
-        // Step 1: Use Physics.Overlap sphere to see if the player's feet is touching the ground
-        Collider[] arry = Physics.OverlapSphere(m_GroundDetector.transform.position, m_GroundDetectionRadius, m_GroundLayer);
-
-        if (arry.Length > 0){ // The player is on the ground
-            // Make the player jump based on the jump height
-            m_RigidBody.AddForce(Vector3.up * m_JumpHeight, ForceMode.Impulse);
-            Debug.Log("Succesful Jump");
-        } else {
-            Debug.Log("Jump Failed");
-        }
-
-    
-        // Detect when the player is on the ground
-        // To double jump, player must be off the ground, has not already double jumped, & the jump button pressed
-    }
-
-    private void HandleMovement(){
-        // Move the player based on the movement input and walk speed
-        m_RigidBody.MovePosition(m_RigidBody.position + transform.forward * m_MoveAmount.y * m_WalkSpeed * Time.fixedDeltaTime +
-        transform.right * m_MoveAmount.x * m_WalkSpeed * Time.fixedDeltaTime);
-    }   
-
-    private void HandleLooking(){
-        // Rotate the camera based on the look input
-        transform.Rotate(Vector3.up * m_LookAmount.x * m_LookSpeed);
-
-        // Calculate vertical rotation
-        m_VericalRotation -= m_LookAmount.y * m_LookSpeed;
-        m_VericalRotation = Mathf.Clamp(m_VericalRotation, -m_VerticalRotationLimit, m_VerticalRotationLimit);
-
-        //Apply vertical rotation to camera only
-        m_Cam.transform.localRotation = Quaternion.Euler(m_VericalRotation, 0f, 0f);
-    }
-
-    private void OnDrawGizmos(){
-         // Set the color with custom alpha
-        Gizmos.color = new Color(1f, 0f, 0f); // Red with custom alpha
-
-        Gizmos.DrawWireSphere(m_GroundDetector.transform.position, m_GroundDetectionRadius);
+        PlayerMovement.Instance.HandleMovement(moveAmount);
+        PlayerMovement.Instance.HandleLooking(lookAmount);
     }
 }
