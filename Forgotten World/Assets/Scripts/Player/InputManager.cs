@@ -27,30 +27,14 @@ public class InputManager : MonoBehaviour
     //attribute variable makes private variable public
     [Header("Components"), Space(5)]
     [SerializeField] private InputActionAsset m_InputActions;
-   // [SerializeField] private Rigidbody m_RigidBody;
-    // Create a private vvar of type GameObject named m_GroundDetector, do not assign it a valu 
-   // [SerializeField] private GameObject m_GroundDetector;
-
-    // [Header("Configuration")]
-    // [SerializeField] float m_GroundDetectionRadius = .25f;
-    // [SerializeField] private LayerMask m_GroundLayer;
 
     [Header("Player Settings"), Space(5)]
     //player input actions (stores player action variables)
     private InputAction m_MoveAction;
     private InputAction m_LookAction;
     private InputAction m_JumpAction;
-
-    // private Vector2 m_MoveAmount;
-    // private Vector2 m_LookAmount;
-    // private float m_VericalRotation = 0f; 
-    
-    // [SerializeField] GameObject m_Cam;
-    // [SerializeField] private float m_WalkSpeed = 5f;
-    // [SerializeField] private float m_JumpHeight = 10f;
-    // [SerializeField] private float m_LookSpeed = 1f;
-    // [SerializeField] private float m_VerticalRotationLimit = 80f; 
-
+    private InputAction m_SprintAction;
+    private InputAction m_CrouchAction;
 
     private void OnEnable()
     {
@@ -80,8 +64,8 @@ public class InputManager : MonoBehaviour
         m_MoveAction = m_InputActions.FindAction("Move");
         m_LookAction = m_InputActions.FindAction("Look");
         m_JumpAction = m_InputActions.FindAction("Jump");
-
-        // m_RigidBody = GetComponent<Rigidbody>();
+        m_SprintAction = m_InputActions.FindAction("Sprint");
+        m_CrouchAction = m_InputActions.FindAction("Crouch");
     }
 
     private void Start() {
@@ -89,7 +73,7 @@ public class InputManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         // Hide the cursor
-        //Cursor.visible = false;
+        Cursor.visible = false;
     }
 
     private void Update()
@@ -98,6 +82,23 @@ public class InputManager : MonoBehaviour
            // Tell PlayerMovement to jump
            PlayerMovement.Instance.HandleJump();
         }
+
+        // Check if the player is holding down the sprint key
+        if (m_SprintAction.IsPressed()){
+            PlayerMovement.Instance.SetSprinting(true);
+        } else {
+            PlayerMovement.Instance.SetSprinting(false);
+        }
+
+        // Checks if the player is holding down the crouch key
+        if (m_CrouchAction.IsPressed()){
+            // Crouch
+            // Height reduced = toggle smaller capsule collider or shrink player collider
+            // move speed set to crouch speed
+            // jump & sprint are disabled
+            // Camera is lowered
+            PlayerMovement.Instance.ToggleCrouched();
+        } 
     }
 
     private void FixedUpdate(){
