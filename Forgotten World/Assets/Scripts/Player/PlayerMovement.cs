@@ -25,6 +25,11 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 m_MoveAmount;
     private Vector2 m_LookAmount;
     private float m_VericalRotation = 0f; 
+    private bool m_IsSprinting = false;
+    [SerializeField] private bool m_isCrouched = false;
+
+    private float m_NormalCamY;
+    //private float m_CrouchCamY;
     
 
     private void Awake()
@@ -42,6 +47,7 @@ public class PlayerMovement : MonoBehaviour
         // Initialize Members
         m_RigidBody = GetComponent<Rigidbody>();
         m_JumpCount = 0;
+        m_NormalCamY = m_Cam.transform.position.y;
     }
 
     public void HandleLooking(Vector2 lookAmount){
@@ -64,6 +70,8 @@ public class PlayerMovement : MonoBehaviour
 
 
     public void HandleJump(){
+        if (m_isCrouched) return; // Skip this function if the player is crouched
+
         Debug.Log("Trying To Jump");
         // Check if the player is on the ground
         // Step 1: Use Physics.Overlap sphere to see if the player's feet is touching the ground
@@ -99,4 +107,30 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireSphere(m_GroundDetector.transform.position, m_GroundDetectionRadius);
     }
 
+    public void SetSprinting(bool isSprinting){
+        if (m_isCrouched) return; // Skip this function if the player is crouched
+
+        m_IsSprinting = isSprinting;
+        if (m_IsSprinting){
+            m_WalkSpeed = 10f; // Sprint Speed
+        } else {
+            m_WalkSpeed = 5f; // Normal Speed
+        }
+    }
+
+    public void ToggleCrouched(){
+        m_isCrouched = !m_isCrouched;
+
+         if (m_isCrouched){
+            m_WalkSpeed = 2.5f; // Sprint Speed
+            // Adjust cam heigh to crouch height
+            Vector3 targetCameraPos = new Vector3(m_Cam.transform.localPosition.x, m_NormalCamY - 6f, m_Cam.transform.localPosition.z);
+            m_Cam.transform.localPosition = Vector3.Lerp(m_Cam.transform.localPosition, targetCameraPos, Time.deltaTime * 5f);
+            
+        } else {
+            m_WalkSpeed = 5f; // Normal Speed
+            Vector3 targetCameraPos = new Vector3(m_Cam.transform.localPosition.x, m_NormalCamY, m_Cam.transform.localPosition.z);
+            m_Cam.transform.localPosition = Vector3.Lerp(m_Cam.transform.localPosition, targetCameraPos, Time.deltaTime * 5f);
+        }
+    }
 }
