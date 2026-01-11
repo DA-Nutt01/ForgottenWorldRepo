@@ -5,12 +5,15 @@ public class PlayerMovement : MonoBehaviour
 
     public static PlayerMovement Instance { get; private set; }
 
+    [Header("Component References"), Space(5)]
     [SerializeField] private Rigidbody m_RigidBody;
     [SerializeField] private GameObject m_GroundDetector;
+    [SerializeField] private CapsuleCollider m_Collider;
 
-    [Header("Configuration")]
+    [Header("Configuration"), Space(5)]
     [SerializeField] float m_GroundDetectionRadius = .25f;
     [SerializeField] private LayerMask m_GroundLayer;
+    
     
     [SerializeField] GameObject m_Cam;
     [SerializeField] private float m_WalkSpeed = 5f;
@@ -27,9 +30,9 @@ public class PlayerMovement : MonoBehaviour
     private float m_VericalRotation = 0f; 
     private bool m_IsSprinting = false;
     [SerializeField] private bool m_isCrouched = false;
-
-    private float m_NormalCamY;
-    //private float m_CrouchCamY;
+    private float m_StandHeight = 2f;
+    private float m_CrouchHeight = 1.2f;
+    
     
 
     private void Awake()
@@ -46,9 +49,21 @@ public class PlayerMovement : MonoBehaviour
 
         // Initialize Members
         m_RigidBody = GetComponent<Rigidbody>();
+        m_Collider = GetComponent<CapsuleCollider>();
+        m_isCrouched = false;
         m_JumpCount = 0;
-        m_NormalCamY = m_Cam.transform.position.y;
     }
+
+    private void Update()
+    {
+       if (m_isCrouched)
+        {
+            m_Collider.height = m_CrouchHeight;
+        } else
+        {
+            m_Collider.height = m_StandHeight;
+        }
+    } 
 
     public void HandleLooking(Vector2 lookAmount){
         // Rotate the camera based on the look input
@@ -77,13 +92,13 @@ public class PlayerMovement : MonoBehaviour
         // Step 1: Use Physics.Overlap sphere to see if the player's feet is touching the ground
         Collider[] arry = Physics.OverlapSphere(m_GroundDetector.transform.position, m_GroundDetectionRadius, m_GroundLayer);
 
-        if (arry.Length > 0){ // The player is on the ground
+        if (IsGrounded()){ // The player is on the ground
             // Make the player jump based on the jump height
             m_JumpCount = 0; // Reset the jump count
             m_RigidBody.AddForce(Vector3.up * m_JumpHeight, ForceMode.Impulse);
             m_JumpCount ++;
             Debug.Log("Succesful Jump");
-        } else if (arry.Length <= 0 ){
+        } else if (!IsGrounded()){
             // Check if the player is able to double jump
             if (m_JumpCount < m_JumpCap){
                 // Double Jump
@@ -109,6 +124,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void SetSprinting(bool isSprinting){
         if (m_isCrouched) return; // Skip this function if the player is crouched
+        if (!IsGrounded()) return; // Skip this function if the player is airborn
 
         m_IsSprinting = isSprinting;
         if (m_IsSprinting){
@@ -122,15 +138,18 @@ public class PlayerMovement : MonoBehaviour
         m_isCrouched = !m_isCrouched;
 
          if (m_isCrouched){
-            m_WalkSpeed = 2.5f; // Sprint Speed
-            // Adjust cam heigh to crouch height
-            Vector3 targetCameraPos = new Vector3(m_Cam.transform.localPosition.x, m_NormalCamY - 6f, m_Cam.transform.localPosition.z);
-            m_Cam.transform.localPosition = Vector3.Lerp(m_Cam.transform.localPosition, targetCameraPos, Time.deltaTime * 5f);
-            
+            m_WalkSpeed = 3f; // Sprint Speed
         } else {
             m_WalkSpeed = 5f; // Normal Speed
-            Vector3 targetCameraPos = new Vector3(m_Cam.transform.localPosition.x, m_NormalCamY, m_Cam.transform.localPosition.z);
-            m_Cam.transform.localPosition = Vector3.Lerp(m_Cam.transform.localPosition, targetCameraPos, Time.deltaTime * 5f);
         }
+    }
+
+    private bool IsGrounded()
+    {
+        // Check if the player is on the ground
+        // Step 1: Use Physics.Overlap sphere to see if the player's feet is touching the ground
+        Collider[] arry = Physics.OverlapSphere(m_GroundDetector.transform.position, m_GroundDetectionRadius, m_GroundLayer);
+        if (arry.Length > 0) return true;
+        return false;
     }
 }
