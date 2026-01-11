@@ -91,7 +91,7 @@ public class InputManager : MonoBehaviour
         }
 
         // Checks if the player is holding down the crouch key
-        if (m_CrouchAction.IsPressed()){
+        if (m_CrouchAction.WasPressedThisFrame()){
             // Crouch
             // Height reduced = toggle smaller capsule collider or shrink player collider
             // move speed set to crouch speed
