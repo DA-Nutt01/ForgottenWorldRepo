@@ -35,6 +35,7 @@ public class InputManager : MonoBehaviour
     private InputAction m_JumpAction;
     private InputAction m_SprintAction;
     private InputAction m_CrouchAction;
+    private InputAction m_InteractAction;
 
     private void OnEnable()
     {
@@ -66,6 +67,7 @@ public class InputManager : MonoBehaviour
         m_JumpAction = m_InputActions.FindAction("Jump");
         m_SprintAction = m_InputActions.FindAction("Sprint");
         m_CrouchAction = m_InputActions.FindAction("Crouch");
+        m_InteractAction = m_InputActions.FindAction("Interact");
     }
 
     private void Start() {
@@ -99,6 +101,9 @@ public class InputManager : MonoBehaviour
             // Camera is lowered
             PlayerMovement.Instance.ToggleCrouched();
         } 
+        if (m_InteractAction.WasPressedThisFrame()){
+            PlayerInteraction.Instance.TryInteract(); // Tell PlayerInteraction (the script)to try to interact
+        }
     }
 
     private void FixedUpdate(){
