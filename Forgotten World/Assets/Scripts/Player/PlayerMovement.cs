@@ -58,10 +58,12 @@ public class PlayerMovement : MonoBehaviour
     {
        if (m_isCrouched)
         {
-            m_Collider.height = m_CrouchHeight;
+            m_Collider.height = Mathf.Lerp(m_StandHeight, m_CrouchHeight, m_StandHeight);
+            //m_Collider.height = m_CrouchHeight;
         } else
         {
-            m_Collider.height = m_StandHeight;
+            m_Collider.height = Mathf.Lerp(m_CrouchHeight, m_StandHeight, m_CrouchHeight);
+            //m_Collider.height = m_StandHeight;
         }
     } 
 
@@ -123,7 +125,11 @@ public class PlayerMovement : MonoBehaviour
     }
 
     public void SetSprinting(bool isSprinting){
-        if (m_isCrouched) return; // Skip this function if the player is crouched
+        if (m_isCrouched) {
+        
+            return; // Skip this function if the player is crouched
+        }
+         
         if (!IsGrounded()) return; // Skip this function if the player is airborn
 
         m_IsSprinting = isSprinting;

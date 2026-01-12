@@ -41,7 +41,7 @@ public class Door : MonoBehaviour
 
             if (interactable != null)
             {
-                _interactionText.text = interactable.GetInteractionPrompt();
+          //      _interactionText.text = interactable.GetInteractionPrompt();
                 _interactionText.enabled = true;
             }
             else
