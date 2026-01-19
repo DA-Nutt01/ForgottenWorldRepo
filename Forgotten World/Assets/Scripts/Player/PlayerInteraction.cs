@@ -27,7 +27,6 @@ public static PlayerInteraction Instance { get; private set; }
         }
 
         m_PromptUI.SetActive(false);
-        m_PromptText = null;
     }
 
     private void Update(){
@@ -51,10 +50,11 @@ public static PlayerInteraction Instance { get; private set; }
                 m_PromptUI.SetActive(true);
                 m_CurrentLookTarget = interactable;
                 m_PromptText.text =  m_CurrentLookTarget?.GetPromptText();
-            } else {
-                m_PromptUI.SetActive(false);
-                m_CurrentLookTarget = null;
-            }
+            } 
+        } else
+        {
+            m_PromptUI.SetActive(false);
+            m_CurrentLookTarget = null;
         }
     }
 
