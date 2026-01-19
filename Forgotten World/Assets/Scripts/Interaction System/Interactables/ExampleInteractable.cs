@@ -1,10 +1,11 @@
 using UnityEngine;
 
-public class ExampleInteractable : MonoBehaviour, IInteractable
+public class ExampleInteractable :  BaseInteractable
 {
-  public void Interact()
-    {
-        Debug.Log("Interacted with " + gameObject.name);
-    }
+
+  public override void Interact()
+  {
+    Debug.Log("Interacted with " + gameObject.name);
+  }
 
 }
