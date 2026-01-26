@@ -3310,6 +3310,57 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 437585712}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &949042000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 949042002}
+  - component: {fileID: 949042001}
+  m_Layer: 0
+  m_Name: Example Gun
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &949042001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 949042000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 639255dc675044a7b992e362e9f7c824, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gun
+  m_GunData: {fileID: 11400000, guid: 044e0e9ac825549359a5f975b22dc840, type: 2}
+  m_GunName: 
+  m_MagSize: 0
+  m_ReloadTime: 0
+  m_FireRate: 0
+  m_Damage: 0
+  m_WeaponPrefab: {fileID: 0}
+--- !u!4 &949042002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 949042000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1001.73566, y: 534.6669, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &973403488 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 450040, guid: 530f5ce44fdac4197a29f5bec8818d85,
@@ -5566,6 +5617,7 @@ GameObject:
   - component: {fileID: 1598975230}
   - component: {fileID: 1598975231}
   - component: {fileID: 1598975232}
+  - component: {fileID: 1598975233}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -5703,6 +5755,19 @@ MonoBehaviour:
   m_CurrentLookTarget: {fileID: 0}
   m_PromptUI: {fileID: 1447175112}
   m_PromptText: {fileID: 1406776053}
+--- !u!114 &1598975233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1598975226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7803c35a543a34f248014401546a34b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GunManager
+  m_EquippedGun: {fileID: 949042001}
 --- !u!1 &1611616949 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1957234706760428, guid: 61b8f3ab787fda74291bbde164182f3f,
@@ -7737,3 +7802,4 @@ SceneRoots:
   - {fileID: 1048923984}
   - {fileID: 561536937}
   - {fileID: 1478084868}
+  - {fileID: 949042002}
