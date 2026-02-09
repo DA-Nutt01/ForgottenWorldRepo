@@ -15,6 +15,11 @@ public class Gun : MonoBehaviour, IGun
     [SerializeField] private int m_Damage;
     // Weapon Prefab
     [SerializeField] private GameObject m_WeaponPrefab;
+    // Gun Barrel 
+    [SerializeField] private Transform m_Barrel;
+    [SerializeField] private Camera m_Cam;
+    //Weapon Range
+    [SerializeField] private float m_WeaponRange;
 
     private void Awake()
     {
@@ -31,8 +36,16 @@ public class Gun : MonoBehaviour, IGun
     // Shoot Function
     public void Shoot()
     {
-        Debug.Log("BANG!");
+        // Shoot a ray from the gun barrel forward the weapon range
+        Ray bulletRay = new Ray(m_Cam.transform.position, m_Cam.transform.forward);
+        // If the bullet ray hits anything in range
+        if (Physics.Raycast(bulletRay, out RaycastHit hit, m_WeaponRange))
+        {
+            //Deals damage
+            Debug.Log($"Bullet hit {hit.collider.name}");
+        }
     }
+    
         // Reload Function
     public void Reload()
     {
