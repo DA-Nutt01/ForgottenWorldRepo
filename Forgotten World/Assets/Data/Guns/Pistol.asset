@@ -17,4 +17,5 @@ MonoBehaviour:
   reloadTime: 1.5
   fireRate: 3
   damage: 25
-  weaponPrefab: {fileID: 0}
+  weaponPrefab: {fileID: 4438252008235868937, guid: f15997f7400367248b6c103c788520ea,
+    type: 3}
