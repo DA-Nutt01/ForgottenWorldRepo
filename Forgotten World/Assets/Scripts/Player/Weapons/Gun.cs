@@ -43,6 +43,16 @@ public class Gun : MonoBehaviour, IGun
         {
             //Deals damage
             Debug.Log($"Bullet hit {hit.collider.name}");
+            // Try to find the target's HP component
+            HitPoints targetHP = hit.collider.GetComponent<HitPoints>();
+            // Check if the target is damageable
+            if (targetHP != null) {
+                // Deal Damage to it
+                targetHP.Damage(m_Damage);
+                Debug.Log($"{hit.collider.name} DOES have HP");
+            } else {
+                Debug.Log($"{hit.collider.name} does NOT have HP");
+            }
         }
     }
     

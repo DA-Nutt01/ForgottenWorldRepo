@@ -109,7 +109,7 @@ public class InputManager : MonoBehaviour
         }
 
         // Check for shoot
-        if (m_ShootAction.IsPressed())
+        if (m_ShootAction.WasPressedThisFrame())
         {
             GunManager.Instance.GetEqippedGun().Shoot();
         }
