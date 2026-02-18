@@ -21,6 +21,12 @@ public class Gun : MonoBehaviour, IGun
     //Weapon Range
     [SerializeField] private float m_WeaponRange;
 
+    [Space(10), Header("Gun VFX")]
+    [SerializeField, Tooltip("A reference to where the bullet spawns from the gun.")]
+    private Transform m_GunBarrel;
+    [SerializeField, Tooltip("The bullet prohjectile prefab that will be spawned when shooting this gun.")]
+    private Transform m_BulletProjectilePrefab;
+
     private void Awake()
     {
         // Awake is the ideal place to initialzie your vairables
@@ -29,13 +35,14 @@ public class Gun : MonoBehaviour, IGun
         m_ReloadTime = m_GunData.reloadTime;
         m_FireRate = m_GunData.fireRate;
         m_Damage = m_GunData.damage;
-        m_WeaponPrefab =m_GunData.weaponPrefab;
+        m_WeaponPrefab = m_GunData.weaponPrefab;
         
     }
 
     // Shoot Function
     public void Shoot()
     {
+
         // Shoot a ray from the gun barrel forward the weapon range
         Ray bulletRay = new Ray(m_Cam.transform.position, m_Cam.transform.forward);
         // If the bullet ray hits anything in range
@@ -54,6 +61,15 @@ public class Gun : MonoBehaviour, IGun
                 Debug.Log($"{hit.collider.name} does NOT have HP");
             }
         }
+    }
+
+    private void HandleShootVisuals()
+    {
+        // Handles the visuals when the gun shoots
+        // Instantiate the bullet project at the barrel of the gun
+        Transform bullet = Instantiate(m_BulletProjectilePrefab, m_GunBarrel.position, Quaternion.identity);
+        BulletProjectile bulletProjectile = bullet.GetComponent<BulletProjectile>();
+        //bulletProjectile.SetUp();
     }
     
         // Reload Function
