@@ -3,30 +3,24 @@ using UnityEngine;
 public class BulletProjectile : MonoBehaviour
 {
     // Destination of the bullet
-    private Vector3 m_TargetPosition;
+    private Vector3 m_TravelDirection;
     [SerializeField]
     private float m_ProjectileSpeed = 200f;
+    [SerializeField] private float m_LifeTime = 1f;
+
+    private void Start(){
+        // Destroy the bullet after its lifetime
+        Destroy(gameObject, m_LifeTime);
+    }
 
     // Where the bullet is going
-    public void Setup(Vector3 targetPos){
-        m_TargetPosition = targetPos;
+    public void Setup(Vector3 direction){
+        m_TravelDirection = direction.normalized;
     }
 
     private void Update(){
-        // Calculate the direction the bullet needs to move in
-        Vector3 moveDir = (m_TargetPosition - transform.position).normalized;
-        // Calculate the distance before the bullet moves this frame
-        float distBeforeMoving = Vector3.Distance(transform.position, m_TargetPosition);
-        // Move the projectile towards the target
-        transform.position += moveDir * m_ProjectileSpeed * Time.deltaTime;
-        // Calculate the distance after moving this frame
-        float distAfterMoving = Vector3.Distance(transform.position, m_TargetPosition);
-
-        // Check if bullet overshot destination
-        if (distBeforeMoving < distAfterMoving){
-            // Destroy this bullet
-            Destroy(gameObject);
-        }
-
+        // Make the bullet travel in the shoot direction
+        transform.position += m_TravelDirection * m_ProjectileSpeed * Time.deltaTime;
+        // Handle Despawn
     }
 }
