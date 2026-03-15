@@ -329,7 +329,7 @@ MonoBehaviour:
   m_FireRate: 0
   m_Damage: 0
   m_WeaponPrefab: {fileID: 0}
-  m_Barrel: {fileID: 0}
+  m_Barrel: {fileID: 2209886830343725799}
   m_Cam: {fileID: 0}
   m_WeaponRange: 100
   m_GunBarrel: {fileID: 2209886830343725799}

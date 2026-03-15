@@ -16,7 +16,6 @@ public class Gun : MonoBehaviour, IGun
     // Weapon Prefab
     [SerializeField] private GameObject m_WeaponPrefab;
     // Gun Barrel 
-    [SerializeField] private Transform m_Barrel;
     [SerializeField] private Camera m_Cam;
     //Weapon Range
     [SerializeField] private float m_WeaponRange;
@@ -45,6 +44,9 @@ public class Gun : MonoBehaviour, IGun
 
         // Shoot a ray from the gun barrel forward the weapon range
         Ray bulletRay = new Ray(m_Cam.transform.position, m_Cam.transform.forward);
+        // A vecto3 to store what the direction the bullet visual will travel in
+        Vector3 shootDirection = m_Cam.transform.forward;
+
         // If the bullet ray hits anything in range
         if (Physics.Raycast(bulletRay, out RaycastHit hit, m_WeaponRange))
         {
@@ -61,15 +63,17 @@ public class Gun : MonoBehaviour, IGun
                 Debug.Log($"{hit.collider.name} does NOT have HP");
             }
         }
+        // Spawn Bullet
+        HandleShootVisuals(shootDirection);
     }
 
-    private void HandleShootVisuals()
+    private void HandleShootVisuals(Vector3 shootDirection)
     {
         // Handles the visuals when the gun shoots
         // Instantiate the bullet project at the barrel of the gun
-        Transform bullet = Instantiate(m_BulletProjectilePrefab, m_GunBarrel.position, Quaternion.identity);
+        Transform bullet = Instantiate(m_BulletProjectilePrefab, m_GunBarrel.position, Quaternion.LookRotation(shootDirection));
         BulletProjectile bulletProjectile = bullet.GetComponent<BulletProjectile>();
-        //bulletProjectile.SetUp();
+        bulletProjectile.Setup(shootDirection);
     }
     
         // Reload Function
